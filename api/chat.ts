@@ -8,8 +8,14 @@ const ALLOWED_ORIGINS = [
 ];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
-  const origin = req.headers.origin ?? '';
+  // Defensive checks
+  if (!req) {
+    return res?.status(400).json({ error: 'Missing request object' }) || null;
+  }
+  
+  const headers = req.headers || {};
+  const origin = headers.origin ?? '';
+  
   if (ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
@@ -33,7 +39,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  const { messages } = req.body as {
+  const body = req.body || {};
+  const { messages } = body as {
     messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
     language?: string;
   };
