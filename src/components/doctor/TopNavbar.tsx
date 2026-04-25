@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useI18n } from '@/i18n/I18nContext';
 import { Globe, ChevronDown, User, Menu } from 'lucide-react';
 import type { Locale } from '@/i18n/translations';
@@ -20,7 +21,13 @@ const TopNavbar = ({ isOnline, onToggleStatus, onToggleSidebar }: TopNavbarProps
   const [langOpen, setLangOpen] = useState(false);
 
   return (
-    <header className="h-14 md:h-16 border-b border-border/50 bg-card flex items-center justify-between px-3 md:px-6 z-50 relative" style={{ boxShadow: 'var(--shadow-soft)' }}>
+    <motion.header
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="relative z-50 flex h-14 items-center justify-between border-b border-border/50 bg-card px-3 md:h-16 md:px-6"
+      style={{ boxShadow: 'var(--shadow-soft)' }}
+    >
       {/* Left */}
       <div className="flex items-center gap-2 md:gap-3">
         <button onClick={onToggleSidebar} className="p-2 rounded-lg hover:bg-secondary transition-colors md:hidden">
@@ -79,7 +86,7 @@ const TopNavbar = ({ isOnline, onToggleStatus, onToggleSidebar }: TopNavbarProps
           <span className="text-sm font-medium text-foreground hidden md:inline">Dr. Rossi</span>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

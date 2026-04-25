@@ -34,10 +34,12 @@ const AppSidebar = ({ currentView, onViewChange, incomingCount, isOpen, onClose 
         const isActive = currentView === item.key;
         const Icon = item.icon;
         return (
-          <button
+          <motion.button
             key={item.key}
+            type="button"
             onClick={() => handleNav(item.key)}
-            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            whileTap={{ scale: 0.98 }}
+            className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               isActive
                 ? 'text-primary bg-accent'
                 : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -57,7 +59,7 @@ const AppSidebar = ({ currentView, onViewChange, incomingCount, isOpen, onClose 
                 {incomingCount}
               </span>
             )}
-          </button>
+          </motion.button>
         );
       })}
     </nav>

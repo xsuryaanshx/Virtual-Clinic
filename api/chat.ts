@@ -1,76 +1,124 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-/**
- * List of origins that are allowed to access this endpoint.
- * Add any additional domains here as your application evolves.
- */
-const ALLOWED_ORIGINS = [
+const DEFAULT_ALLOWED_ORIGINS = [
   'https://virtual-clinic-beta.vercel.app',
   'https://virtual-clinic-eta.vercel.app',
   'http://localhost:5173',
   'http://localhost:4173',
+  'http://localhost:3000',
 ];
 
-/**
- * Helper to safely retrieve the request origin.
- * Uses optional chaining – Vercel's request object may be missing headers in edge cases.
- */
+const MAX_MESSAGES = 40;
+const MAX_CONTENT_LENGTH = 8000;
+
+type ChatRole = 'system' | 'user' | 'assistant';
+
+function parseAllowedOrigins(): string[] {
+  const raw = process.env.ALLOWED_ORIGINS?.trim();
+  if (!raw) return DEFAULT_ALLOWED_ORIGINS;
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function getOrigin(req: VercelRequest): string {
   return req.headers?.origin ?? '';
 }
 
-/**
- * Main handler for the `/api/chat` serverless function.
- * It validates CORS, HTTP method, request payload and forwards the request to OpenRouter.
- */
+function parseJsonBody(req: VercelRequest): unknown {
+  const raw = req.body;
+  if (raw == null) return {};
+  if (typeof raw === 'object' && !Buffer.isBuffer(raw)) return raw;
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  if (Buffer.isBuffer(raw)) {
+    try {
+      return JSON.parse(raw.toString('utf8')) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  return {};
+}
+
+function isChatRole(r: string): r is ChatRole {
+  return r === 'system' || r === 'user' || r === 'assistant';
+}
+
+function validateMessages(input: unknown): { role: ChatRole; content: string }[] | null {
+  if (!Array.isArray(input) || input.length === 0) return null;
+  if (input.length > MAX_MESSAGES) return null;
+
+  const out: { role: ChatRole; content: string }[] = [];
+  for (const item of input) {
+    if (!item || typeof item !== 'object') return null;
+    const role = (item as { role?: unknown }).role;
+    const content = (item as { content?: unknown }).content;
+    if (typeof role !== 'string' || !isChatRole(role)) return null;
+    if (typeof content !== 'string' || content.trim().length === 0) return null;
+    if (content.length > MAX_CONTENT_LENGTH) return null;
+    out.push({ role, content: content.trim() });
+  }
+  return out;
+}
+
+function refererHeader(): string {
+  const site = process.env.SITE_URL?.trim();
+  if (site) return site.replace(/\/$/, '');
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel) return `https://${vercel.replace(/^https?:\/\//, '')}`;
+  return 'https://virtual-clinic-beta.vercel.app';
+}
+
+function safeUpstreamError(status: number, text: string): string {
+  if (process.env.NODE_ENV === 'development') {
+    return `OpenRouter API error (${status}): ${text.slice(0, 2000)}`;
+  }
+  return 'The AI service returned an error. Please try again later.';
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // ------------------- Defensive guard -------------------
-  if (!req || typeof (req as any).method !== 'string') {
-    // This protects against accidental client‑side imports of the module.
+  if (!req || typeof (req as { method?: unknown }).method !== 'string') {
     return res?.status?.(500).json({ error: 'Serverless function invoked without a valid request object.' }) ?? null;
   }
 
-  // ------------------- CORS handling -------------------
+  const allowedOrigins = parseAllowedOrigins();
   const origin = getOrigin(req);
-  const isAllowed = ALLOWED_ORIGINS.includes(origin);
-  const allowOrigin = isAllowed ? origin : '*';
+  const isAllowed = !origin || allowedOrigins.includes(origin);
+  const allowOrigin =
+    isAllowed && origin ? origin : isAllowed ? '*' : allowedOrigins[0] ?? '*';
 
   res.setHeader('Access-Control-Allow-Origin', allowOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  // Uncomment the line below if you ever need to send cookies or other credentials.
-  // res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-  // ------------------- Pre‑flight (OPTIONS) -------------------
   if (req.method === 'OPTIONS') {
-    // Vercel expects an empty body for a successful pre‑flight response.
     return res.status(204).end();
   }
 
-  // ------------------- Method validation -------------------
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
 
-  // ------------------- Body parsing -------------------
-  let body: any;
-  try {
-    // Vercel automatically parses JSON bodies, but we fallback to manual parsing for safety.
-    body = typeof req.body === 'object' && req.body !== null ? req.body : await (req as any).json?.();
-  } catch (_) {
-    // If parsing fails we fall back to an empty object.
-    body = {};
+  const parsed = parseJsonBody(req);
+  if (parsed === null) {
+    return res.status(400).json({ error: 'Invalid JSON body.' });
   }
 
-  const { messages } = body as {
-    messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
-  };
-
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: 'Invalid request: `messages` array is required.' });
+  const body = parsed as { messages?: unknown };
+  const messages = validateMessages(body.messages);
+  if (!messages) {
+    return res.status(400).json({
+      error: `Invalid request: messages must be a non-empty array (max ${MAX_MESSAGES}) of { role, content } with role system|user|assistant and non-empty content (max ${MAX_CONTENT_LENGTH} chars each).`,
+    });
   }
 
-  // ------------------- OpenRouter API key -------------------
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     return res.status(500).json({
@@ -78,19 +126,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // ------------------- Forward request to OpenRouter -------------------
+  const model = process.env.OPENROUTER_MODEL?.trim() || 'meta-llama/llama-3.3-70b-instruct';
+
   try {
     const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        // These meta‑headers help OpenRouter attribute usage to your app.
-        'HTTP-Referer': 'https://virtual-clinic-beta.vercel.app',
+        'HTTP-Referer': refererHeader(),
         'X-Title': 'Virtual Clinic',
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct',
+        model,
         max_tokens: 1000,
         messages,
       }),
@@ -98,12 +146,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!openRouterResponse.ok) {
       const errorText = await openRouterResponse.text();
-      return res.status(openRouterResponse.status).json({
-        error: `OpenRouter API error: ${errorText}`,
+      return res.status(openRouterResponse.status >= 500 ? 502 : openRouterResponse.status).json({
+        error: safeUpstreamError(openRouterResponse.status, errorText),
       });
     }
 
-    const data = await openRouterResponse.json();
+    const rawText = await openRouterResponse.text();
+    let data: { choices?: { message?: { content?: string } }[] };
+    try {
+      data = JSON.parse(rawText) as typeof data;
+    } catch {
+      return res.status(502).json({ error: 'Invalid response from AI service.' });
+    }
+
     const content: string = data.choices?.[0]?.message?.content ?? '';
     return res.status(200).json({ content });
   } catch (err) {

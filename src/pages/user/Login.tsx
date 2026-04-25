@@ -1,16 +1,20 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, User, Stethoscope } from 'lucide-react';
-import PageTransition from '@/components/user/PageTransition';
-import { signIn } from '@/lib/supabase';
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Eye, EyeOff, Loader2, User, Stethoscope } from "lucide-react";
+import PageTransition from "@/components/user/PageTransition";
+import { signIn } from "@/lib/supabase";
+import { useI18n } from "@/lib/i18n";
+import { smoothEase } from "@/lib/motionVariants";
 
-type RoleTab = 'patient' | 'doctor';
+type RoleTab = "patient" | "doctor";
 
 const Login = () => {
-  const [roleTab, setRoleTab] = useState<RoleTab>('patient');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { t } = useI18n();
+  const reduceMotion = useReducedMotion();
+  const [roleTab, setRoleTab] = useState<RoleTab>("patient");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,129 +31,151 @@ const Login = () => {
         return;
       }
       const role = data.user?.user_metadata?.role;
-      // If user logged in as doctor tab but account is patient (or vice versa), warn them
-      if (roleTab === 'doctor' && role !== 'doctor') {
-        setError('This account is not registered as a doctor. Please use the Patient tab.');
+      if (roleTab === "doctor" && role !== "doctor") {
+        setError("This account is not registered as a doctor. Please use the Patient tab.");
         setLoading(false);
         return;
       }
-      if (roleTab === 'patient' && role === 'doctor') {
-        setError('This is a doctor account. Please use the Doctor tab or go to your doctor dashboard.');
+      if (roleTab === "patient" && role === "doctor") {
+        setError(
+          "This is a doctor account. Please use the Doctor tab or go to your doctor dashboard."
+        );
         setLoading(false);
         return;
       }
-      // Use window.location for hard redirect to ensure auth state updates
-      window.location.href = role === 'doctor' ? '/doctor/dashboard' : '/dashboard';
+      window.location.href = role === "doctor" ? "/doctor/dashboard" : "/dashboard";
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
       setLoading(false);
     }
   };
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex items-center justify-center px-6 pt-16">
+      <div className="flex min-h-screen items-center justify-center px-6 pt-16">
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.96, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="w-full max-w-md"
         >
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
-            <p className="mt-2 text-muted-foreground">Sign in to your account</p>
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("auth.welcome")}</h1>
+            <p className="mt-2 text-muted-foreground">{t("auth.signInSubtitle")}</p>
           </div>
 
-          {/* Role tab selector */}
-          <div className="flex gap-2 mb-6 bg-secondary rounded-2xl p-1.5">
+          <div className="mb-6 flex gap-2 rounded-2xl bg-secondary p-1.5">
             <button
-              onClick={() => { setRoleTab('patient'); setError(null); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                roleTab === 'patient'
-                  ? 'bg-card shadow-card text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+              type="button"
+              onClick={() => {
+                setRoleTab("patient");
+                setError(null);
+              }}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all ${
+                roleTab === "patient"
+                  ? "bg-card text-foreground shadow-card"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <User className="w-4 h-4" />
-              Patient
+              <User className="h-4 w-4" />
+              {t("auth.rolePatient")}
             </button>
             <button
-              onClick={() => { setRoleTab('doctor'); setError(null); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                roleTab === 'doctor'
-                  ? 'bg-emerald-500 shadow-card text-white'
-                  : 'text-muted-foreground hover:text-foreground'
+              type="button"
+              onClick={() => {
+                setRoleTab("doctor");
+                setError(null);
+              }}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all ${
+                roleTab === "doctor"
+                  ? "bg-emerald-500 text-white shadow-card"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Stethoscope className="w-4 h-4" />
-              Doctor
+              <Stethoscope className="h-4 w-4" />
+              {t("auth.roleDoctor")}
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-card rounded-3xl shadow-card p-8 space-y-6">
+          <motion.form
+            onSubmit={(e) => void handleSubmit(e)}
+            className="space-y-6 rounded-3xl bg-card p-8 shadow-card"
+            whileHover={reduceMotion ? undefined : { boxShadow: "var(--shadow-elevated)" }}
+            transition={smoothEase}
+          >
             {error && (
-              <div className="px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+              <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Email</label>
+              <label className="text-sm font-medium text-foreground" htmlFor="login-email">
+                {t("auth.email")}
+              </label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                className="w-full rounded-xl border-0 bg-secondary px-4 py-3 text-foreground transition-all placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="nome@email.com"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Password</label>
+              <label className="text-sm font-medium text-foreground" htmlFor="login-password">
+                {t("auth.password")}
+              </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all pr-12"
+                  className="w-full rounded-xl border-0 bg-secondary px-4 py-3 pr-12 text-foreground transition-all placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
             <div className="text-right">
               <button type="button" className="text-sm text-primary hover:underline">
-                Forgot password?
+                {t("auth.forgotPassword")}
               </button>
             </div>
 
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
-              className={`w-full py-3.5 rounded-xl font-medium hover:opacity-90 transition-opacity active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 ${
-                roleTab === 'doctor' ? 'bg-emerald-500 text-white' : 'gradient-hero text-primary-foreground'
+              whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-medium transition-opacity hover:opacity-90 active:scale-[0.98] disabled:opacity-60 ${
+                roleTab === "doctor"
+                  ? "bg-emerald-500 text-white"
+                  : "gradient-hero text-primary-foreground"
               }`}
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Sign In as {roleTab === 'doctor' ? 'Doctor' : 'Patient'}
-            </button>
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {roleTab === "doctor" ? t("auth.signInAsDoctor") : t("auth.signInAsPatient")}
+            </motion.button>
 
             <p className="text-center text-sm text-muted-foreground">
-              No account?{' '}
-              <Link to="/signup" className="text-primary font-medium hover:underline">
-                Sign up
+              {t("auth.noAccount")}{" "}
+              <Link to="/signup" className="font-medium text-primary hover:underline">
+                {t("nav.signup")}
               </Link>
             </p>
-          </form>
+          </motion.form>
         </motion.div>
       </div>
     </PageTransition>

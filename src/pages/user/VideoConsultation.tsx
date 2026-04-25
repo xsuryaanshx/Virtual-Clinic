@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 import { useNavigate } from 'react-router-dom';
 import { PhoneOff, Mic, MicOff, Video, VideoOff, User, FileText, AlertTriangle, Info } from 'lucide-react';
@@ -9,6 +9,7 @@ import ReviewModal from '@/components/user/ReviewModal';
 const VideoConsultation = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -54,49 +55,56 @@ const VideoConsultation = () => {
 
           {/* Controls */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.4 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-4"
+            className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-3 sm:gap-4"
           >
-            <button
+            <motion.button
+              type="button"
+              whileTap={reduceMotion ? undefined : { scale: 0.94 }}
               onClick={() => setMuted(!muted)}
-              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-colors ${
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors sm:h-14 sm:w-14 ${
                 muted ? 'bg-destructive' : 'bg-muted/20 hover:bg-muted/30'
               }`}
             >
-              {muted ? <MicOff className="w-5 h-5 text-primary-foreground" /> : <Mic className="w-5 h-5 text-primary-foreground" />}
-            </button>
+              {muted ? <MicOff className="h-5 w-5 text-primary-foreground" /> : <Mic className="h-5 w-5 text-primary-foreground" />}
+            </motion.button>
 
-            {/* Hang up — triggers review */}
-            <button
+            <motion.button
+              type="button"
+              whileTap={reduceMotion ? undefined : { scale: 0.92 }}
               onClick={handleHangUp}
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-destructive flex items-center justify-center hover:bg-destructive/90 transition-colors active:scale-95"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive transition-colors hover:bg-destructive/90 sm:h-16 sm:w-16"
             >
-              <PhoneOff className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
-            </button>
+              <PhoneOff className="h-5 w-5 text-primary-foreground sm:h-6 sm:w-6" />
+            </motion.button>
 
-            <button
+            <motion.button
+              type="button"
+              whileTap={reduceMotion ? undefined : { scale: 0.94 }}
               onClick={() => setCameraOff(!cameraOff)}
-              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-colors ${
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors sm:h-14 sm:w-14 ${
                 cameraOff ? 'bg-destructive' : 'bg-muted/20 hover:bg-muted/30'
               }`}
             >
-              {cameraOff ? <VideoOff className="w-5 h-5 text-primary-foreground" /> : <Video className="w-5 h-5 text-primary-foreground" />}
-            </button>
+              {cameraOff ? <VideoOff className="h-5 w-5 text-primary-foreground" /> : <Video className="h-5 w-5 text-primary-foreground" />}
+            </motion.button>
 
-            <button
+            <motion.button
+              type="button"
+              whileTap={reduceMotion ? undefined : { scale: 0.94 }}
               onClick={() => setShowInfo(!showInfo)}
-              className="lg:hidden w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/20 transition-colors hover:bg-muted/30 lg:hidden sm:h-14 sm:w-14"
             >
-              <Info className="w-5 h-5 text-primary-foreground" />
-            </button>
+              <Info className="h-5 w-5 text-primary-foreground" />
+            </motion.button>
           </motion.div>
         </div>
 
         {/* Sidebar */}
         <motion.div
-          initial={{ x: 100, opacity: 0 }}
+          initial={reduceMotion ? false : { x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
           className={`${showInfo ? 'block' : 'hidden'} lg:block w-full lg:w-80 bg-card border-t lg:border-t-0 lg:border-l border-border p-5 sm:p-6 overflow-y-auto max-h-[40vh] lg:max-h-none`}

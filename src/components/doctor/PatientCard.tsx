@@ -23,11 +23,12 @@ const PatientCard = ({ patient, onViewDetails, onAccept, index }: PatientCardPro
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      className="glass-card p-5 group cursor-pointer"
+      whileHover={{ y: -3, transition: { duration: 0.22 } }}
+      className="glass-card group cursor-pointer p-5 shadow-card transition-shadow hover:shadow-elevated"
     >
       <div className="flex items-start justify-between mb-3">
         <div>
@@ -62,19 +63,23 @@ const PatientCard = ({ patient, onViewDetails, onAccept, index }: PatientCardPro
       </div>
 
       <div className="flex gap-2">
-        <button
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.98 }}
           onClick={(e) => { e.stopPropagation(); onViewDetails(patient); }}
-          className="flex-1 text-sm font-medium py-2 rounded-lg border border-border text-foreground hover:bg-secondary transition-colors"
+          className="flex-1 rounded-lg border border-border py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
         >
           {t('patients.view_details')}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.98 }}
           onClick={(e) => { e.stopPropagation(); onAccept(patient); }}
-          className="flex-1 text-sm font-medium py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
           {t('patients.accept')}
           <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+        </motion.button>
       </div>
     </motion.div>
   );

@@ -56,6 +56,11 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.hasAccount': 'Hai già un account?',
     'auth.welcome': 'Bentornato',
     'auth.createAccount': 'Crea il tuo account',
+    'auth.signInSubtitle': 'Accedi al tuo account',
+    'auth.rolePatient': 'Paziente',
+    'auth.roleDoctor': 'Medico',
+    'auth.signInAsPatient': 'Accedi come paziente',
+    'auth.signInAsDoctor': 'Accedi come medico',
 
     // Dashboard
     'dashboard.title': 'Dashboard Paziente',
@@ -74,6 +79,11 @@ const translations: Record<Language, Record<string, string>> = {
     'chat.response2': 'Hai notato altri sintomi associati? Febbre, stanchezza?',
     'chat.response3': 'Grazie per le informazioni. Ho raccolto abbastanza dati per il triage. Ti mostro i risultati.',
     'chat.error': "Errore durante la connessione all'assistente AI. Riprova.",
+    'chat.consultationTitle': 'Chat di consulenza',
+    'chat.consultationSubtitle': 'Collegato in sicurezza tramite Supabase Realtime',
+    'chat.aiPowered': 'Alimentato da OpenRouter AI',
+    'chat.messagePlaceholder': 'Scrivi un messaggio…',
+    'chat.finishTriage': 'Termina triage',
 
     // Triage
     'triage.title': 'Risultato Triage',
@@ -155,6 +165,11 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.hasAccount': 'Already have an account?',
     'auth.welcome': 'Welcome back',
     'auth.createAccount': 'Create your account',
+    'auth.signInSubtitle': 'Sign in to your account',
+    'auth.rolePatient': 'Patient',
+    'auth.roleDoctor': 'Doctor',
+    'auth.signInAsPatient': 'Sign in as Patient',
+    'auth.signInAsDoctor': 'Sign in as Doctor',
 
     'dashboard.title': 'Patient Dashboard',
     'dashboard.welcome': 'Welcome',
@@ -171,6 +186,11 @@ const translations: Record<Language, Record<string, string>> = {
     'chat.response2': 'Have you noticed any other associated symptoms? Fever, fatigue?',
     'chat.response3': 'Thank you for the information. I have enough data for triage. Let me show you the results.',
     'chat.error': 'Error connecting to the AI assistant. Please try again.',
+    'chat.consultationTitle': 'Consultation chat',
+    'chat.consultationSubtitle': 'Connected securely via Supabase Realtime',
+    'chat.aiPowered': 'Powered by OpenRouter AI',
+    'chat.messagePlaceholder': 'Type your message…',
+    'chat.finishTriage': 'Finish triage',
 
     'triage.title': 'Triage Result',
     'triage.urgency': 'Urgency Level',
@@ -248,6 +268,11 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.hasAccount': 'Уже есть аккаунт?',
     'auth.welcome': 'С возвращением',
     'auth.createAccount': 'Создайте аккаунт',
+    'auth.signInSubtitle': 'Войдите в аккаунт',
+    'auth.rolePatient': 'Пациент',
+    'auth.roleDoctor': 'Врач',
+    'auth.signInAsPatient': 'Войти как пациент',
+    'auth.signInAsDoctor': 'Войти как врач',
 
     'dashboard.title': 'Панель Пациента',
     'dashboard.welcome': 'Добро пожаловать',
@@ -264,6 +289,11 @@ const translations: Record<Language, Record<string, string>> = {
     'chat.response2': 'Заметили ли вы другие сопутствующие симптомы? Температура, усталость?',
     'chat.response3': 'Спасибо за информацию. У меня достаточно данных для сортировки. Показываю результаты.',
     'chat.error': 'Ошибка подключения к AI-ассистенту. Попробуйте снова.',
+    'chat.consultationTitle': 'Чат консультации',
+    'chat.consultationSubtitle': 'Защищённое соединение через Supabase Realtime',
+    'chat.aiPowered': 'На базе OpenRouter AI',
+    'chat.messagePlaceholder': 'Введите сообщение…',
+    'chat.finishTriage': 'Завершить триаж',
 
     'triage.title': 'Результат Сортировки',
     'triage.urgency': 'Уровень Срочности',

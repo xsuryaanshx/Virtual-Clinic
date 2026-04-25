@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import { Toaster as Sonner } from "@/components/user/ui/sonner";
 import { Toaster } from "@/components/user/ui/toaster";
 import { TooltipProvider } from "@/components/user/ui/tooltip";
@@ -25,13 +26,25 @@ import DoctorDashboard from "./pages/doctor/Index.tsx";
 
 const queryClient = new QueryClient();
 
-const UserLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex flex-col min-h-screen">
-    <UserNavbar />
-    <main className="flex-1">{children}</main>
-    <Footer />
-  </div>
-);
+const UserLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const reduceMotion = useReducedMotion();
+  return (
+    <div className="flex flex-col min-h-screen">
+      <UserNavbar />
+      <motion.main
+        key={location.pathname}
+        className="flex-1"
+        initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        {children}
+      </motion.main>
+      <Footer />
+    </div>
+  );
+};
 
 // Guard: redirects to /login if not authenticated
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
