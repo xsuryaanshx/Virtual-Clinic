@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // ✅ CORS (important for Vite + Vercel)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -36,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://virtual-clinic.vercel.app',
+        'HTTP-Referer': 'https://virtual-clinic-beta.vercel.app',
         'X-Title': 'Virtual Clinic',
       },
       body: JSON.stringify({
@@ -47,6 +46,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const text = await response.text();
+
+    if (!text) {
+      return res.status(500).json({
+        error: 'Empty response from AI',
+      });
+    }
 
     let data;
     try {
