@@ -1,5 +1,15 @@
-import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
 
-createRoot(document.getElementById("root")!).render(<App />);
+// 🔥 GLOBAL ERROR HANDLER (prevents crash)
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("UNHANDLED PROMISE:", event.reason);
+});
+
+// 🔥 SAFE RENDER
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
