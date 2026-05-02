@@ -2,12 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 
-// 🔥 GLOBAL ERROR HANDLER (prevents crash)
+// 🔥 Prevent Promise crash from breaking UI
 window.addEventListener("unhandledrejection", (event) => {
-  console.error("UNHANDLED PROMISE:", event.reason);
+  console.error("Unhandled Promise:", event.reason);
 });
 
-// 🔥 SAFE RENDER
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
