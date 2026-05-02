@@ -11,8 +11,6 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
 
   const sendMessage = async () => {
-    console.log("SEND CLICKED");
-
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -25,8 +23,6 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      console.log("Calling API...");
-
       const response = await fetch(`${window.location.origin}/api/chat`, {
         method: "POST",
         headers: {
@@ -37,15 +33,19 @@ export default function Chat() {
         }),
       });
 
+      // ✅ SAFELY HANDLE RESPONSE
       const text = await response.text();
 
       if (!text) {
         throw new Error("Empty response from server");
       }
 
-      const data = JSON.parse(text);
-
-      console.log("API RESPONSE:", data);
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON response");
+      }
 
       if (!response.ok) {
         throw new Error(data?.error || "Request failed");
@@ -53,12 +53,12 @@ export default function Chat() {
 
       const aiMessage: Message = {
         role: "assistant",
-        content: data?.content || "No response",
+        content: data?.content || "No response from AI",
       };
 
       setMessages((prev) => [...prev, aiMessage]);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("CHAT ERROR:", error);
 
       setMessages((prev) => [
@@ -101,6 +101,9 @@ export default function Chat() {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Type your message..."
         style={{ width: "80%", padding: 10 }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") sendMessage();
+        }}
       />
 
       <button onClick={sendMessage} style={{ padding: 10 }}>
