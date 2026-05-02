@@ -11,6 +11,8 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
 
   const sendMessage = async () => {
+    console.log("SEND CLICKED");
+
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -23,7 +25,9 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
+      console.log("Calling API...");
+
+      const response = await fetch(`${window.location.origin}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,7 +37,15 @@ export default function Chat() {
         }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+
+      if (!text) {
+        throw new Error("Empty response from server");
+      }
+
+      const data = JSON.parse(text);
+
+      console.log("API RESPONSE:", data);
 
       if (!response.ok) {
         throw new Error(data?.error || "Request failed");
