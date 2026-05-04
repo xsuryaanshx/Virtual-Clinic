@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 15% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 10%;
+
+    --primary: 213 94% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 15% 25%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 50%;
+
+    --accent: 213 94% 96%;
+    --accent-foreground: 213 94% 40%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 213 94% 55%;
+
+    --radius: 1rem;
+
+    --surface: 220 20% 98%;
+    --surface-elevated: 0 0% 100%;
+    --gradient-hero: linear-gradient(135deg, hsl(213 94% 55%), hsl(230 80% 60%));
+    --gradient-subtle: linear-gradient(180deg, hsl(220 20% 98%), hsl(0 0% 100%));
+    --shadow-soft: 0 2px 20px -4px hsl(220 15% 10% / 0.08);
+    --shadow-card: 0 4px 30px -8px hsl(220 15% 10% / 0.06);
+    --shadow-elevated: 0 8px 40px -12px hsl(220 15% 10% / 0.12);
+    --glass-bg: hsl(0 0% 100% / 0.72);
+    --glass-border: hsl(0 0% 100% / 0.6);
+
+    --urgency-low: 142 71% 45%;
+    --urgency-medium: 38 92% 50%;
+    --urgency-high: 0 72% 51%;
+    --online: 142 71% 45%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* ── Dark mode ── */
+  .dark {
+    --background: 222 20% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 222 18% 11%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 222 18% 11%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 213 94% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 16% 16%;
+    --secondary-foreground: 210 20% 85%;
+
+    --muted: 222 16% 16%;
+    --muted-foreground: 210 12% 55%;
+
+    --accent: 213 40% 18%;
+    --accent-foreground: 213 94% 70%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 16% 20%;
+    --input: 222 16% 20%;
+    --ring: 213 94% 60%;
+
+    --surface: 222 18% 10%;
+    --surface-elevated: 222 18% 13%;
+    --gradient-hero: linear-gradient(135deg, hsl(213 94% 55%), hsl(230 80% 55%));
+    --gradient-subtle: linear-gradient(180deg, hsl(222 18% 10%), hsl(222 20% 8%));
+    --shadow-soft: 0 2px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-card: 0 4px 30px -8px hsl(0 0% 0% / 0.25);
+    --shadow-elevated: 0 8px 40px -12px hsl(0 0% 0% / 0.4);
+    --glass-bg: hsl(222 20% 8% / 0.8);
+    --glass-border: hsl(222 16% 22% / 0.7);
+
+    --sidebar-background: 222 18% 10%;
+    --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 213 94% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 16% 16%;
+    --sidebar-accent-foreground: 210 20% 85%;
+    --sidebar-border: 222 16% 20%;
+    --sidebar-ring: 213 94% 60%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Prevent iOS text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Use dynamic viewport height for mobile */
+    height: -webkit-fill-available;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent overflow on mobile */
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    /* Safe area insets for notched phones */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+
+  /* Prevent tap highlight on mobile */
+  a, button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Fix input zoom on iOS — inputs must be at least 16px to prevent auto-zoom */
+  input, textarea, select {
+    font-size: max(16px, 1em);
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .text-gradient {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.5) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* Safe padding bottom for phones with home indicator */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.05); opacity: 1; }
+  }
+
+  .animate-breathe {
+    animation: breathe 3s ease-in-out infinite;
+  }
+}
